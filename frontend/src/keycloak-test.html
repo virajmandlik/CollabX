@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keycloak Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/keycloak-js@21.0.0/dist/keycloak.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        #container {
+            display: none;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button.secondary {
+            background-color: #008CBA;
+        }
+        button.danger {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>Keycloak Integration Test</h1>
+    <p>This page tests the connection to Keycloak.</p>
+    
+    <div id="login-container">
+        <button id="login-button">Login with Keycloak</button>
+    </div>
+    
+    <div id="container">
+        <h2>Authentication Status</h2>
+        <p id="status">Checking authentication status...</p>
+        
+        <h2>User Info</h2>
+        <pre id="user-info">Loading user info...</pre>
+        
+        <h2>Token</h2>
+        <pre id="token-info">Loading token...</pre>
+        
+        <h2>Actions</h2>
+        <button id="refresh-button" class="secondary">Refresh Token</button>
+        <button id="test-backend-button" class="secondary">Test Backend Connection</button>
+        <button id="logout-button" class="danger">Logout</button>
+        
+        <h2>Backend Test Result</h2>
+        <pre id="backend-result">Not tested yet</pre>
+    </div>
+    
+    <script>
+        // Get hostname for determining Keycloak URL
+        const currentHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'localhost' 
+            : window.location.hostname;
+        
+        // Initialize Keycloak
+        const keycloak = new Keycloak({
+            url: `http://${currentHost}:8080`,
+            realm: 'whiteboard-app',
+            clientId: 'whiteboard-client'
+        });
+        
+        console.log("Keycloak config:", {
+            url: `http://${currentHost}:8080`,
+            realm: 'whiteboard-app',
+            clientId: 'whiteboard-client'
+        });
+        
+        // Login handler
+        document.getElementById('login-button').addEventListener('click', () => {
+            initKeycloak();
+        });
+        
+        // Initialize Keycloak
+        function initKeycloak() {
+            keycloak.init({
+                onLoad: 'login-required',
+                checkLoginIframe: false,
+                pkceMethod: 'S256',
+                enableLogging: true
+            }).then(authenticated => {
+                updateUI(authenticated);
+                if (authenticated) {
+                    setupLogoutButton();
+                    setupRefreshButton();
+                    setupTestBackendButton();
+                    
+                    // Setup token refresh
+                    keycloak.onTokenExpired = () => {
+                        console.log('Token expired, refreshing...');
+                        keycloak.updateToken(30).then(refreshed => {
+                            if (refreshed) {
+                                console.log('Token refreshed successfully');
+                                updateUI(true);
+                            } else {
+                                console.log('Token not refreshed, still valid');
+                            }
+                        }).catch(error => {
+                            console.error('Failed to refresh token', error);
+                            keycloak.login();
+                        });
+                    };
+                }
+            }).catch(error => {
+                console.error('Keycloak initialization failed', error);
+                document.getElementById('status').textContent = 'Authentication failed: ' + error;
+            });
+        }
+        
+        // Update UI based on authentication state
+        function updateUI(authenticated) {
+            document.getElementById('login-container').style.display = authenticated ? 'none' : 'block';
+            document.getElementById('container').style.display = authenticated ? 'block' : 'none';
+            
+            if (authenticated) {
+                document.getElementById('status').textContent = 'Authenticated';
+                document.getElementById('user-info').textContent = JSON.stringify(keycloak.tokenParsed, null, 2);
+                
+                // Show only first part of token for security
+                const token = keycloak.token;
+                const tokenPreview = token.substring(0, 20) + '...' + token.substring(token.length - 10);
+                
+                document.getElementById('token-info').textContent = `Token: ${tokenPreview}\n\nExpires at: ${new Date(keycloak.tokenParsed.exp * 1000).toLocaleString()}`;
+            } else {
+                document.getElementById('status').textContent = 'Not authenticated';
+            }
+        }
+        
+        // Setup logout button
+        function setupLogoutButton() {
+            document.getElementById('logout-button').addEventListener('click', () => {
+                keycloak.logout();
+            });
+        }
+        
+        // Setup refresh button
+        function setupRefreshButton() {
+            document.getElementById('refresh-button').addEventListener('click', () => {
+                keycloak.updateToken(30).then(refreshed => {
+                    if (refreshed) {
+                        console.log('Token refreshed successfully');
+                        updateUI(true);
+                        alert('Token refreshed successfully');
+                    } else {
+                        console.log('Token not refreshed, still valid');
+                        alert('Token not refreshed, still valid');
+                    }
+                }).catch(error => {
+                    console.error('Failed to refresh token', error);
+                    alert('Failed to refresh token: ' + error);
+                });
+            });
+        }
+        
+        // Setup test backend button
+        function setupTestBackendButton() {
+            document.getElementById('test-backend-button').addEventListener('click', () => {
+                const backendResultElem = document.getElementById('backend-result');
+                backendResultElem.textContent = 'Testing connection to backend...';
+                
+                // First test the open endpoint
+                fetch('http://localhost:4000/test')
+                    .then(response => response.json())
+                    .then(data => {
+                        backendResultElem.textContent = 'Public endpoint:\n' + JSON.stringify(data, null, 2) + '\n\nTesting protected endpoint...';
+                        
+                        // Then test a protected endpoint with the token
+                        return fetch('http://localhost:4000/whiteboards', {
+                            headers: {
+                                'Authorization': 'Bearer ' + keycloak.token
+                            }
+                        });
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Response not OK: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const currentResult = backendResultElem.textContent;
+                        backendResultElem.textContent = currentResult + '\n\nProtected endpoint:\n' + JSON.stringify(data, null, 2);
+                    })
+                    .catch(error => {
+                        const currentResult = backendResultElem.textContent;
+                        backendResultElem.textContent = currentResult + '\n\nError testing protected endpoint: ' + error.message;
+                    });
+            });
+        }
+    </script>
+</body>
+</html> 

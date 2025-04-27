@@ -1,0 +1,239 @@
+/* Base theme variables */
+:root {
+  /* Light theme (default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #6c757d;
+  --border-color: #dee2e6;
+  --card-bg: #ffffff;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --navbar-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  --navbar-text: #ffffff;
+  --primary-color: #0d6efd;
+  --success-color: #198754;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #0dcaf0;
+  --hover-bg: rgba(0, 0, 0, 0.05);
+  --modal-bg: #ffffff;
+  --modal-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  --input-bg: #ffffff;
+  --input-border: #ced4da;
+  --input-text: #212529;
+  --button-hover: rgba(0, 0, 0, 0.1);
+  --transition-speed: 0.3s;
+}
+
+/* Dark theme */
+[data-theme='dark'] {
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2d2d2d;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --text-muted: #888888;
+  --border-color: #333333;
+  --card-bg: #1e1e1e;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --navbar-bg: linear-gradient(135deg, #1a365d 0%, #0f172a 100%);
+  --navbar-text: #e0e0e0;
+  --primary-color: #3b82f6;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --warning-color: #f59e0b;
+  --info-color: #06b6d4;
+  --hover-bg: rgba(255, 255, 255, 0.05);
+  --modal-bg: #1e1e1e;
+  --modal-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+  --input-bg: #2d2d2d;
+  --input-border: #444444;
+  --input-text: #e0e0e0;
+  --button-hover: rgba(255, 255, 255, 0.1);
+}
+
+/* Apply theme variables to elements */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+.card, .modal-content {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  box-shadow: var(--card-shadow);
+  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+/* Canvas styling for dark mode */
+[data-theme='dark'] .konvajs-content canvas {
+  background-color: #2d2d2d !important;
+}
+
+.navbar {
+  background: var(--navbar-bg) !important;
+  color: var(--navbar-text);
+}
+
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+.form-control {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+}
+
+.form-control:focus {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+}
+
+.modal-content {
+  background-color: var(--modal-bg);
+}
+
+.modal-header {
+  border-bottom-color: var(--border-color);
+}
+
+.modal-footer {
+  border-top-color: var(--border-color);
+}
+
+.bg-light {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Theme toggle button styles */
+.theme-toggle-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  margin-right: 10px;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--hover-bg);
+}
+
+/* Animation for theme toggle */
+.theme-toggle-btn svg {
+  transition: transform 0.5s ease;
+}
+
+.theme-toggle-btn:hover svg {
+  transform: rotate(30deg);
+}
+
+/* Dark mode specific styles for feature cards */
+[data-theme='dark'] .hover-lift {
+  background-color: var(--bg-tertiary);
+}
+
+/* Welcome message in dark mode */
+[data-theme='dark'] .welcome-message {
+  background-color: rgba(18, 18, 18, 0.9);
+}
+
+/* Dashboard cards in dark mode */
+[data-theme='dark'] .dashboard-card {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+/* Adjust badge colors for dark mode */
+[data-theme='dark'] .badge.bg-primary {
+  background-color: #3b82f6 !important;
+}
+
+/* Adjust button colors for dark mode */
+[data-theme='dark'] .btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+[data-theme='dark'] .btn-success {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+[data-theme='dark'] .btn-danger {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+[data-theme='dark'] .btn-outline-secondary {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .btn-outline-light {
+  color: var(--navbar-text);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Adjust modal backdrop for dark mode */
+[data-theme='dark'] .modal-backdrop {
+  background-color: #000;
+}
+
+/* Whiteboard Canvas specific dark mode styles */
+[data-theme='dark'] .bg-white {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme='dark'] .text-black {
+  color: var(--text-primary) !important;
+}
+
+[data-theme='dark'] .border-gray-300 {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .hover\:bg-gray-100:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+/* Adjust the time display in dark mode */
+[data-theme='dark'] .bg-gradient-to-r.from-blue-500.to-purple-500 {
+  background: linear-gradient(90deg, #1a365d 0%, #4c1d95 100%) !important;
+}
+
+/* Adjust active users badges in dark mode */
+[data-theme='dark'] .bg-blue-100 {
+  background-color: #1e3a5f !important;
+}
+
+[data-theme='dark'] .text-blue-800 {
+  color: #93c5fd !important;
+}
+
+[data-theme='dark'] .bg-gray-100 {
+  background-color: #374151 !important;
+}
+
+[data-theme='dark'] .text-gray-800 {
+  color: #d1d5db !important;
+}
+
+/* Smooth transition for all elements */
+* {
+  transition: background-color var(--transition-speed) ease,
+              color var(--transition-speed) ease,
+              border-color var(--transition-speed) ease,
+              box-shadow var(--transition-speed) ease;
+}
