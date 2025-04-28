@@ -2,15 +2,11 @@
 ```markdown
 # CollabX 🚀
 
-![CollabX Banner](https://via.placeholder.com/1200x400.png?text=CollabX+-+Real-Time+Collaborative+Whiteboard)
 
 A **feature-rich real-time collaborative whiteboard application** offering secure authentication, seamless multi-user collaboration, image recognition, and a sleek modern UI with full light/dark mode support.
 
 ---
 
-![Build Status](https://img.shields.io/github/workflow/status/your-username/CollabX/Build)
-![License](https://img.shields.io/github/license/your-username/CollabX)
-![Tech Stack](https://img.shields.io/badge/Tech%20Stack-React%20%7C%20TypeScript%20%7C%20Socket.io-blue)
 
 ## ✨ Features
 
