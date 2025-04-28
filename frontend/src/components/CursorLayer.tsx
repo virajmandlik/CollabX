@@ -18,11 +18,11 @@ interface CursorLayerProps {
 
 const CursorLayer = ({ socket, roomId, stageWidth, stageHeight }: CursorLayerProps) => {
   const [cursors, setCursors] = useState<Record<string, RemoteCursor>>({});
-  
+
   // Listen for cursor movements from other users
   useEffect(() => {
     if (!socket) return;
-    
+
     const handleCursorMove = (data: { userId: string; position: { x: number; y: number }; color: string; username: string }) => {
       const { userId, position, color, username } = data;
       setCursors(prev => ({
@@ -36,7 +36,7 @@ const CursorLayer = ({ socket, roomId, stageWidth, stageHeight }: CursorLayerPro
         }
       }));
     };
-    
+
     const handleUserLeft = (data: { userId: string }) => {
       const { userId } = data;
       setCursors(prev => {
@@ -45,16 +45,16 @@ const CursorLayer = ({ socket, roomId, stageWidth, stageHeight }: CursorLayerPro
         return newCursors;
       });
     };
-    
+
     socket.on('cursor-move', handleCursorMove);
     socket.on('user-left', handleUserLeft);
-    
+
     return () => {
       socket.off('cursor-move', handleCursorMove);
       socket.off('user-left', handleUserLeft);
     };
   }, [socket]);
-  
+
   // Clean up stale cursors (remove cursors that haven't been updated in 10 seconds)
   useEffect(() => {
     const interval = setInterval(() => {
@@ -69,14 +69,14 @@ const CursorLayer = ({ socket, roomId, stageWidth, stageHeight }: CursorLayerPro
         return newCursors;
       });
     }, 5000);
-    
+
     return () => clearInterval(interval);
   }, []);
-  
+
   return (
     <div className="cursor-layer" style={{ position: 'absolute', pointerEvents: 'none', top: 0, left: 0, width: stageWidth, height: stageHeight }}>
       {Object.values(cursors).map(cursor => (
-        <div 
+        <div
           key={cursor.userId}
           style={{
             position: 'absolute',
@@ -88,7 +88,7 @@ const CursorLayer = ({ socket, roomId, stageWidth, stageHeight }: CursorLayerPro
           }}
         >
           {/* Cursor icon */}
-          <div 
+          <div
             style={{
               width: 0,
               height: 0,
@@ -96,19 +96,24 @@ const CursorLayer = ({ socket, roomId, stageWidth, stageHeight }: CursorLayerPro
               borderRight: '8px solid transparent',
               borderBottom: `15px solid ${cursor.color || '#007bff'}`,
               transform: 'rotate(-45deg)',
+              filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
+              animation: 'pulse 2s infinite'
             }}
           />
-          
+
           {/* Username label */}
           <div
             style={{
               backgroundColor: cursor.color || '#007bff',
               color: 'white',
-              padding: '2px 4px',
-              borderRadius: '3px',
-              fontSize: '10px',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              fontSize: '11px',
               marginTop: '2px',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+              opacity: 0.9,
+              fontWeight: 'bold'
             }}
           >
             {cursor.username || 'Guest'}
@@ -119,4 +124,4 @@ const CursorLayer = ({ socket, roomId, stageWidth, stageHeight }: CursorLayerPro
   );
 };
 
-export default CursorLayer; 
+export default CursorLayer;

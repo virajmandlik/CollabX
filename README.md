@@ -19,7 +19,7 @@ A **feature-rich real-time collaborative whiteboard application** offering secur
 - Secure authentication powered by **Keycloak**
 - Drawing tools with customizable colors and brush sizes
 - Undo/Redo functionality for all actions
-- Real-time cursor tracking of all participants
+- Real-time cursor tracking with user identification and color coding
 - Export whiteboard as **PNG** or **PDF**
 - Integrated live chat for communication during collaboration
 - Email invitations to onboard collaborators
@@ -72,6 +72,17 @@ Bring more expression to your collaboration:
 2. Select and place emojis onto the whiteboard
 3. Drag and reposition emojis freely
 4. Real-time synchronization of emojis across all users
+
+---
+
+## 👆 Real-Time Cursor Tracking
+
+See exactly where your collaborators are working:
+- Each user's cursor is displayed in real-time with their username
+- Cursors are color-coded based on the user's identity
+- Smooth animations make cursor movements fluid and natural
+- Cursors automatically disappear when users leave the whiteboard
+- Works seamlessly with drawing tools and other interactions
 
 ---
 
@@ -145,10 +156,6 @@ If you face any issues:
 - Imagga API (for image recognition)
 
 ---
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
 
 ---
 

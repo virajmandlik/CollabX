@@ -12,6 +12,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Pencil, Eraser, Trash2, Upload, Download, FileDown, ArrowLeft, Image, X, Search, Undo2, Redo2 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import CursorLayer from './CursorLayer';
 import { cn } from '../lib/utils';
 import VitImageClassifier from './VitImageClassifier';
 import ImageRecognition, { Category } from './ImageRecognition';
@@ -129,9 +130,12 @@ const WhiteboardCanvas = () => {
           });
         });
 
+        // Listen for user left events
         socketInstance.on('user-left', (data) => {
           console.log('User left:', data);
-          setActiveUsers(prevUsers => prevUsers.filter(user => user.userId !== data.userId));
+          setActiveUsers(prevUsers =>
+            prevUsers.filter(user => user.userId !== data.userId)
+          );
         });
 
         socketInstance.on('room-info', (data) => {
@@ -424,9 +428,10 @@ const WhiteboardCanvas = () => {
     }
   };
 
-  const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
-    if (!isDrawing) return;
+  // Track the last time we sent a cursor position update
+  const lastCursorUpdateRef = useRef<number>(0);
 
+  const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
     const stage = stageRef.current;
     if (!stage) return;
 
@@ -439,6 +444,22 @@ const WhiteboardCanvas = () => {
       // Instead of stopping drawing, just don't add the point outside boundaries
       return;
     }
+
+    // Emit cursor position to other users (throttled to every 50ms)
+    const now = Date.now();
+    if (socket && socket.connected && now - lastCursorUpdateRef.current > 50) {
+      socket.emit('cursor-move', {
+        roomId: id,
+        position: pointerPos,
+        // Generate a consistent color based on username
+        color: stringToColor(keycloak.tokenParsed?.preferred_username || 'user'),
+        username: keycloak.tokenParsed?.preferred_username || 'user'
+      });
+      lastCursorUpdateRef.current = now;
+    }
+
+    // Only continue with drawing if we're in drawing mode
+    if (!isDrawing) return;
 
     const newLines = [...lines];
     const lastLine = newLines[newLines.length - 1];
@@ -455,6 +476,20 @@ const WhiteboardCanvas = () => {
         isNewLine: false
       });
     }
+  };
+
+  // Helper function to generate a color from a string (username)
+  const stringToColor = (str: string): string => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    let color = '#';
+    for (let i = 0; i < 3; i++) {
+      const value = (hash >> (i * 8)) & 0xFF;
+      color += ('00' + value.toString(16)).substr(-2);
+    }
+    return color;
   };
 
   const handleMouseUp = () => {
@@ -980,7 +1015,7 @@ const WhiteboardCanvas = () => {
         <div className="col-span-9">
           <Card className="overflow-hidden border-none shadow-md">
             <div
-              className="bg-white rounded-lg"
+              className="bg-white rounded-lg relative"
               style={{
                 border: '1px solid var(--text-primary)',
                 padding: '2px',
@@ -989,6 +1024,14 @@ const WhiteboardCanvas = () => {
               onDrop={handleCanvasDrop}
               onDragOver={handleCanvasDragOver}
             >
+              {/* Cursor Layer for showing other users' cursors */}
+              <CursorLayer
+                socket={socket}
+                roomId={id}
+                stageWidth={stageSize.width}
+                stageHeight={stageSize.height}
+              />
+
               <Stage
                 width={stageSize.width}
                 height={stageSize.height}
